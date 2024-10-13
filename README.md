@@ -14,7 +14,7 @@ Para iniciar el proyecto:
     ```
 ---
 
-ToDo:
+# ToDo:
 - [ ] Firebase
     - [ ]  Configurar Realtime Database
     - [ ]  Cloud Functions   
@@ -32,6 +32,8 @@ ToDo:
 - [ ] Recordatorios:
     - [ ] Envio mediante email al usuario en fecha y con la periodicidad establecida
     - [ ] Envio de recordatorios por email solo a dominio establecido
+
+<!-- Para marcar una tarea completada, se agrega una x entre los corchetes, ej. - [x] Firebase -->
 
 ---
 
