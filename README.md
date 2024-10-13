@@ -15,4 +15,5 @@ Para iniciar el proyecto:
 
 ---
 
+*Los scripts y archivos temporales a utilizar los dejé en src/static*
 *Recordar subir los respectivos cambios en una nueva rama y utilizar issues para controlar las versiones y evitar problemas*
