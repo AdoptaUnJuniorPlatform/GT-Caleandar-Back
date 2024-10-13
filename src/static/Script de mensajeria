@@ -1,0 +1,27 @@
+const nodemailer = require('nodemailer');
+
+// Configuración del transportador SMTP
+let transporter = nodemailer.createTransport({
+    service: 'gmail', // Gmail u otros servicios como Outlook, Yahoo, etc.
+    auth: {
+        user: 'ejemplo@gmail.com', // Tu correo
+        pass: '12354asd' // Contraseña de la cuenta o contraseña de app si se usa verificación en dos pasos
+    }
+});
+
+// Definir los detalles del correo
+let mailOptions = {
+    from: 'correoejemplo@gmail.com', //Correo del usuario
+    to: 'destinatarioejemplo.com', // Correo destino
+    subject: 'Hola amigo',
+    text: 'Hola que tal , estoy usando un script creado por javascript que te envia un mensaje,'
+};
+
+// Enviar el correo
+transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+        console.log(error);
+    } else {
+        console.log('Correo enviado: ' + info.response);
+    }
+});

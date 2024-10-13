@@ -1,0 +1,115 @@
+// Dejo un pequeño archivo main con el enlace a firebase + el enlace de la base de datos (En este caso la direccion de la base de datos, es una  mia de prueba)
+// Mirala y modificala a tu criterio, y ya me cuentas los cambios, puedes añadirlos aqui si quieres.
+
+// Importa el SDK de Firebase
+const admin = require('firebase-admin');
+
+// Se Importa el archivo de credenciales
+const serviceAccount = require('./clave.json'); // clave privada generada
+
+//Se  Inicializa la aplicación de Firebase
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount), 
+  databaseURL: "https://pruebafirebase-d0b05-default-rtdb.europe-west1.firebasedatabase.app" // Direccion de base de datos de prueba
+});
+
+// Función para agregar un nuevo empleado:
+
+const agregarEmpleado = async (id, nombre, apellidos, rol) => {
+  try {
+    await admin.database().ref(`empleados/${id}`).set({
+      nombre: nombre,
+      apellidos: apellidos,
+      rol: rol
+    });
+    console.log("Empleado agregado con éxito.");
+  } catch (error) {
+    console.error("Error al agregar empleado:", error);
+  }
+};
+
+// Función para leer empleados:
+
+const leerEmpleados = async () => {
+  try {
+    const snapshot = await admin.database().ref('empleados').once('value');
+    const empleados = snapshot.val();
+    console.log("Empleados:", empleados);
+  } catch (error) {
+    console.error("Error al leer empleados:", error);
+  }
+};
+
+
+// Función para agregar una nueva tarea:
+
+const agregarTarea = async (id, asignadoA, estado, fecha, nombre, prioridad) => {
+  try {
+    await admin.database().ref(`tareas/${id}`).set({
+      asignadoA: asignadoA,
+      estado: estado,
+      fecha: fecha,
+      nombre: nombre,
+      prioridad:prioridad
+    });
+    console.log("Tarea agregada con éxito.");
+  } catch (error) {
+    console.error("Error al agregar la tarea:", error);
+  }
+};
+
+// Función para leer tareas:
+
+const leerTareas = async () => {
+  try {
+    const snapshot = await admin.database().ref('tareas').once('value');
+    const tareas = snapshot.val();
+    console.log("Tareas:", tareas);
+  } catch (error) {
+    console.error("Error al leer las tareas:", error);
+  }
+};
+
+
+// Función para eliminar un empleado:
+const eliminarEmpleado = async (id) => {
+  try {
+    await admin.database().ref(`empleados/${id}`).remove();
+    console.log(`Empleado con ID ${id} eliminado con éxito.`);
+  } catch (error) {
+    console.error("Error al eliminar empleado:", error);
+  }
+};
+
+
+// Función para eliminar una tarea:
+const eliminarTarea = async (id) => {
+  try {
+    await admin.database().ref(`tareas/${id}`).remove();
+    console.log(`Tarea con ID ${id} eliminada con éxito.`);
+  } catch (error) {
+    console.error("Error al eliminar tarea:", error);
+  }
+};
+
+
+
+
+
+// Ejemplo de uso , he dejado concomentarios las llamadas de las funciones para que se use la que uno necesite.
+
+ // agregarEmpleado("4", "Paco", "Diaz", "Fontanero");
+  //leerEmpleados();
+
+  //agregarTarea("104","Pendiente","2-12-2024","Desatascar el bano","Alta");
+  //leerTareas();
+
+ // Eliminar empleado y tarea como ejemplo
+
+ //eliminarEmpleado("4"); // Eliminar empleado con ID 4
+ //eliminarTarea("4"); // Eliminar tarea con ID 4
+
+  // Leer de nuevo para verificar que se eliminaron
+ //leerEmpleados();
+ //leerTareas();
