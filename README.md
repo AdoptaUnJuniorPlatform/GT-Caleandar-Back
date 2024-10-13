@@ -2,12 +2,12 @@
 
 Para iniciar el proyecto:
 1. Clonar repositorio
-2. Ejecutar:
+2. Navegar a la raiz del proyecto e instalar dependencias:
 
     ```sh
     npm install
     ```
-3. Correr servidor local:
+3. Ejecutar servidor local:
 
     ```sh
     npm run dev
