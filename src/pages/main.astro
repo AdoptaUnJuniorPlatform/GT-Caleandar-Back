@@ -1,0 +1,49 @@
+---
+import { auth } from '../static/firebaseconfig';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+---
+
+<html>
+  <head>
+    <title>Main</title>
+  </head>
+  <body>
+    <div id="userInfo">
+      <h2>Bienvenido</h2>
+      <img id="userPhoto" src="" alt="Foto de perfil" />
+      <p id="userName"></p>
+      <p id="userEmail"></p>
+    </div>
+    <button id="logoutButton">Cerrar sesión</button>
+
+    <script>
+      import { auth } from '../static/firebaseconfig';
+      import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const userPhoto = document.getElementById('userPhoto') as HTMLImageElement | null;
+          const userName = document.getElementById('userName');
+          const userEmail = document.getElementById('userEmail');
+
+          if (userPhoto) userPhoto.src = user.photoURL || '';
+          if (userName) userName.textContent = `Nombre: ${user.displayName}`;
+          if (userEmail) userEmail.textContent = `Email: ${user.email}`;
+        } else {
+          window.location.href = '/';
+        }
+      });
+
+      const logoutButton = document.getElementById('logoutButton');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+          signOut(auth).then(() => {
+            window.location.href = '/';
+          }).catch((error) => {
+            console.error('Error al cerrar sesión:', error);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
