@@ -16,21 +16,21 @@ Para iniciar el proyecto:
 
 # ToDo:
 - [ ] Firebase
-    - [ ]  Configurar Realtime Database
+    - [X]  Configurar Realtime Database
     - [ ]  Cloud Functions   
-- [ ] Conectar proyecto Firebase con Astro
-- [ ] Inicio de sesión:
-    - [ ] Login mediante Gmail, autorización mediante tokens
-    - [ ] Registro si la cuenta no está registrada
+- [X] Conectar proyecto Firebase con Astro
+- [X] Inicio de sesión:
+    - [X] Login mediante Gmail, autorización mediante tokens
+    - [X] Registro si la cuenta no está registrada
         - [ ] Login y registro solo mediante un dominio establecido 
     - [ ] Manejo de sesión, expiración de token
-- [ ] Crud tareas:
-    - [ ] Añadir tarea
-    - [ ] Eliminar tarea
-    - [ ] Editar tarea
-    - [ ] Modificar tarea
+- [X] Crud tareas:
+    - [X] Añadir tarea
+    - [X] Eliminar tarea
+    - [X] Editar tarea
+    - [X] Modificar tarea
 - [ ] Recordatorios:
-    - [ ] Envio mediante email al usuario en fecha y con la periodicidad establecida
+    - [X] Envio mediante email al usuario en fecha y con la periodicidad establecida
     - [ ] Envio de recordatorios por email solo a dominio establecido
 
 <!-- Para marcar una tarea completada, se agrega una x entre los corchetes, ej. - [x] Firebase -->
