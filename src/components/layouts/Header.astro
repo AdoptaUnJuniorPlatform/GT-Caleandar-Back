@@ -1,0 +1,189 @@
+<header class="header">
+  <div class="logo__section">
+    <img src="/images/logo.svg" alt="logo" class="logo__picture" />
+    <div class="text__container">
+      <p class="text__primary">LeanMind</p>
+      <p class="text__secondary">EFFECTIVE DEVELOPMENT</p>
+    </div>
+  </div>
+  <div class="search-container">
+    <img src="/icons/len.svg" alt="Buscar" class="search-icon" />
+    <input type="text" placeholder="Buscar" class="search-input" />
+  </div>
+
+  <div class="user__section">
+    <img src="/icons/bell.svg" alt="lec image" class="len__image" />
+    <div class="user-desc__section">
+      <img
+        id="userPhoto"
+        src="/images/default-user-img.png"
+        alt="user-image"
+        class="profile__image"
+      />
+      <div class="user-text__container">
+        <p id="userName" class="user__name"></p>
+        <!-- <p class="user__position">Programador</p> -->
+        <button id="logoutButton" class="user__position">Cerrar Sesión</button>
+      </div>
+      <img
+        src="/icons/arrow-down.svg"
+        alt="user-image"
+        class="arrow-down__image"
+      />
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    padding: 10px 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid gray;
+  }
+  .logo__section {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+  .logo__picture {
+    width: 66px;
+    height: 53px;
+  }
+  .text__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+  .text__primary {
+    font-size: 21px;
+    font-weight: 400;
+    font-family: "Inter", sans-serif;
+    color: var(--color-primary);
+  }
+  .text__secondary {
+    font-size: 0.5rem;
+    color: var(--color-secondary);
+  }
+
+  /* Search section */
+  .search-container {
+    display: none;
+    align-items: center;
+    background-color: #e9e9e9;
+    border-radius: 20px;
+    padding: 10px 15px;
+    height: 40px;
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
+
+  .search-input {
+    border: none;
+    background: none;
+    outline: none;
+    width: 100%;
+    color: #547483;
+    font-size: 16px;
+  }
+
+  .search-input::placeholder {
+    color: #6a7a88;
+  }
+
+  /* user section */
+  .user__section {
+    display: flex;
+    flex-direction: row;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  .len__image {
+    width: 3rem;
+    height: 3rem;
+  }
+  .user-desc__section {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+  }
+  .profile__image {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 100%;
+    object-fit: cover;
+  }
+  .user-text__container {
+  }
+  .user__name {
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-monserrat);
+  }
+  .user__position {
+    font-size: 10px;
+    font-family: var(--font-monserrat-alt);
+  }
+  .arrow-down__image {
+    width: 10px;
+    height: 5px;
+  }
+
+  @media (min-width: 768px) {
+    .search-container {
+      display: flex;
+      width: 200px;
+    }
+  }
+
+  @media (min-width: 850px) {
+    .search-container {
+      display: flex;
+      width: 300px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .search-container {
+      display: flex;
+      width: 495px;
+    }
+  }
+</style>
+
+<script>
+  import { auth } from '../../static/js/firebaseconfig';
+  import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const userPhoto = document.getElementById('userPhoto') as HTMLImageElement | null;
+      const userName = document.getElementById('userName');
+      const userEmail = document.getElementById('userEmail');
+
+      if (userPhoto) userPhoto.src = user.photoURL || '';
+      if (userName) userName.textContent = `${user.displayName}`;
+      if (userEmail) userEmail.textContent = `${user.email}`;
+    } else {
+      window.location.href = '/login';
+    }
+  });
+
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = '/login';
+      }).catch((error) => {
+        console.error('Error al cerrar sesión:', error);
+      });
+    });
+  }
+</script>
