@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulario de Tarea</title>
+    
+    <!-- Importar los módulos necesarios de Firebase -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+      import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+      import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+      // Configuración de Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyCNvRFL-YT9Pby9u5Oz8Z_cTr6kZRX5rKk",
+        authDomain: "caleandar-leanmind.firebaseapp.com",
+        databaseURL: "https://caleandar-leanmind-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "caleandar-leanmind",
+        storageBucket: "caleandar-leanmind.appspot.com",
+        messagingSenderId: "61171199093",
+        appId: "1:61171199093:web:0d91f9edb0594de9cd1c3c"
+      };
+
+      // Inicializar Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+
+      // Configurar persistencia de sesión
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => console.log("Persistencia de sesión establecida"))
+        .catch((error) => console.error("Error al establecer la persistencia:", error));
+
+      // Función para actualizar el userId en el formulario
+      const updateUserId = () => {
+        const user = auth.currentUser;
+        if (user) {
+          document.getElementById('userId').value = user.uid;
+        } else {
+          console.error("No hay usuario autenticado");
+        }
+      };
+
+      // Listener para cambios en el estado de autenticación
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          updateUserId();
+        }
+      });
+
+      // Función para manejar el envío del formulario
+      const formSubmitHandler = async (event) => {
+        event.preventDefault();
+
+        const user = auth.currentUser;
+        if (!user) {
+          alert('No estás autenticado');
+          return;
+        }
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+        const userId = user.uid;
+        const idToken = await user.getIdToken();
+
+        try {
+          const response = await fetch('http://localhost:5001/caleandar-leanmind/us-central1/endDatos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              ...data,
+              userId: userId,
+            }),
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            alert('Tarea enviada correctamente y correo enviado si la fecha es hoy');
+          } else {
+            alert('Hubo un error al enviar la tarea');
+            console.error('Error:', result.message);
+          }
+        } catch (error) {
+          alert('Hubo un error al enviar la tarea');
+          console.error('Error:', error);
+        }
+      };
+
+      // Asociar el controlador de evento al formulario cuando el documento esté listo
+      window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('task-form').addEventListener('submit', formSubmitHandler);
+      });
+    </script>
+
+    <style>
+      .form-container {
+        width: 300px;
+        margin: auto;
+        padding: 10px;
+        background: #f4f4f4;
+        border-radius: 8px;
+      }
+      input, textarea, select, button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h1>Formulario de Tarea</h1>
+      <form id="task-form">
+        <input type="hidden" name="userId" id="userId" />
+
+        <label for="titulo">Título de la tarea</label>
+        <input type="text" name="titulo" required />
+
+        <label for="descripcion">Descripción de la tarea</label>
+        <textarea name="descripcion" required></textarea>
+
+        <label for="email_responsables">Emails de responsables (separados por coma)</label>
+        <input type="text" name="email_responsables" required />
+
+        <label for="fecha_tarea">Fecha de la tarea (YYYY-MM-DD)</label>
+        <input type="date" name="fecha_tarea" required />
+
+        <label for="prioridad">Prioridad</label>
+        <select name="prioridad" required>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+
+        <label for="estado">Estado</label>
+        <select name="estado" required>
+          <option value="pendiente">Pendiente</option>
+          <option value="completada">Completada</option>
+        </select>
+
+        <label for="tipo">Tipo de tarea</label>
+        <select name="tipo" required>
+          <option value="evento">Evento</option>
+          <option value="tarea">Tarea</option>
+        </select>
+
+        <label for="periodicidad_tipo">Tipo de periodicidad</label>
+        <select name="periodicidad_tipo" required>
+          <option value="semanal">Semanal</option>
+          <option value="unico">Único</option>
+        </select>
+
+        <label for="periodicidad_dias">Días de la semana</label>
+        <input type="text" name="periodicidad_dias" placeholder="Lunes, Martes" />
+
+        <label for="periodicidad_hora">Hora de la tarea</label>
+        <input type="time" name="periodicidad_hora" />
+
+        <label for="periodicidad_fin_de_semana">Incluir fin de semana</label>
+        <input type="checkbox" name="periodicidad_fin_de_semana" value="true" />
+
+        <button type="submit">Enviar Tarea</button>
+      </form>
+    </div>
+  </body>
+</html>
+
