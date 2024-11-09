@@ -1,0 +1,1 @@
+Para que funcions funcione tienes que añadir las herramientas de firebase, e instalar repositorios de node + nodemailer en esta carpeta. ademas hay que rellenar el .env email y contraseña
