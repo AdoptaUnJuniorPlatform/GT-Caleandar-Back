@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Función para recibir datos, guardarlos en Firebase y enviar correos si la fecha es hoy
+// 1. Función de Endpoint (Recibir datos, guardarlos en Firebase y enviar correos si la fecha es hoy)
 exports.endDatos = functions.https.onRequest((req, res) => {
     cors(req, res, async () => {
         if (req.method !== 'POST') {
@@ -38,6 +38,7 @@ exports.endDatos = functions.https.onRequest((req, res) => {
         const taskRef = admin.database().ref(`/tareas/${userId}`).push();
         const tarea_id = taskRef.key;
 
+        
         const taskData = {
             descripcion,
             email_responsables: email_responsables.split(','),
@@ -46,8 +47,7 @@ exports.endDatos = functions.https.onRequest((req, res) => {
             periodicidad,
             prioridad,
             tipo,
-            titulo,
-            createdAt: Date.now()
+            titulo
         };
 
         await taskRef.set(taskData);
@@ -78,83 +78,36 @@ exports.endDatos = functions.https.onRequest((req, res) => {
     });
 });
 
-// Función programada para verificar las tareas cada día
-exports.verifyDailyTasks = functions.https.onRequest((req, res) => {
+// 2. Función para obtener las tareas de un usuario por ID
+exports.getTasksByUserId = functions.https.onRequest(async (req, res) => {
     cors(req, res, async () => {
-        console.log('Verificando tareas para hoy...');
-
-        const today = new Date().toISOString().split('T')[0];
-        const tasksRef = admin.database().ref('/tareas');
-        const snapshot = await tasksRef.once('value');
-        const tasks = snapshot.val();
-
-        if (!tasks) {
-            console.log('No hay tareas en la base de datos');
-            return res.status(200).send('No hay tareas en la base de datos');
+        if (req.method !== 'GET') {
+            return res.status(405).json({ error: 'Método no permitido' });
         }
 
-        for (const usuarioId in tasks) {
-            const userTasks = tasks[usuarioId];
+        const { userId } = req.query;
+        if (!userId) {
+            return res.status(400).json({ error: 'Falta el parámetro userId' });
+        }
 
-            for (const taskId in userTasks) {
-                const task = userTasks[taskId];
-                const { fecha_tarea, email_responsables, descripcion, titulo } = task;
+        try {
+            const tasksRef = admin.database().ref(`/tareas/${userId}`);
+            const snapshot = await tasksRef.once('value');
+            const tasks = snapshot.val();
 
-                if (fecha_tarea === today) {
-                    const mailOptions = {
-                        from: process.env.EMAIL_USER,
-                        to: Array.isArray(email_responsables) ? email_responsables.join(', ') : email_responsables,
-                        subject: `Recordatorio: ${titulo}`,
-                        text: `Descripción de la tarea: ${descripcion}`,
-                    };
-
-                    try {
-                        await transporter.sendMail(mailOptions);
-                        console.log(`Correo enviado a: ${email_responsables.join(', ')}`);
-                    } catch (error) {
-                        console.error(`Error al enviar correo para la tarea ${taskId}:`, error);
-                    }
-                }
+            if (!tasks) {
+                return res.status(404).json({ error: 'No se encontraron tareas para este usuario' });
             }
-        }
 
-        return res.status(200).send('Verificación de tareas completada');
+            return res.status(200).json(tasks);
+        } catch (error) {
+            console.error('Error al recuperar las tareas:', error);
+            return res.status(500).json({ error: 'Error al recuperar las tareas' });
+        }
     });
 });
 
-// Función para limpiar tareas completadas antiguas
-exports.cleanupOldTasks = functions.https.onRequest((req, res) => {
-    cors(req, res, async () => {
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-        const tasksRef = admin.database().ref('/tareas');
-        const snapshot = await tasksRef.once('value');
-        const tasks = snapshot.val();
-
-        if (!tasks) {
-            console.log('No hay tareas para limpiar.');
-            return res.status(200).send('No hay tareas para limpiar.');
-        }
-
-        const updates = {};
-        Object.entries(tasks).forEach(([userId, userTasks]) => {
-            Object.entries(userTasks).forEach(([taskId, task]) => {
-                if (task.estado === 'completada' && new Date(task.fecha_fin) < oneMonthAgo) {
-                    updates[`${userId}/${taskId}`] = null;
-                }
-            });
-        });
-
-        if (Object.keys(updates).length > 0) {
-            await tasksRef.update(updates);
-        }
-
-        return res.status(200).send('Tareas antiguas limpiadas');
-    });
-});
-
-// Función para actualizar una tarea existente
+// 3. Función para actualizar una tarea existente
 exports.updateTask = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'El usuario no está autenticado');
@@ -199,31 +152,84 @@ exports.updateTask = functions.https.onCall(async (data, context) => {
     }
 });
 
-// Función para obtener las tareas de un usuario
-exports.getTasksByUserId = functions.https.onRequest(async (req, res) => {
+// 4. Función programada para verificar las tareas cada día
+exports.verifyDailyTasks = functions.https.onRequest((req, res) => {
     cors(req, res, async () => {
-        if (req.method !== 'GET') {
-            return res.status(405).json({ error: 'Método no permitido' });
+        console.log('Verificando tareas para hoy...');
+
+        const today = new Date().toISOString().split('T')[0];
+        const tasksRef = admin.database().ref('/tareas');
+        const snapshot = await tasksRef.once('value');
+        const tasks = snapshot.val();
+
+        if (!tasks) {
+            console.log('No hay tareas en la base de datos');
+            return res.status(200).send('No hay tareas en la base de datos');
         }
 
-        const { userId } = req.query;
-        if (!userId) {
-            return res.status(400).json({ error: 'Falta el parámetro userId' });
-        }
+        for (const usuarioId in tasks) {
+            const userTasks = tasks[usuarioId];
 
-        try {
-            const tasksRef = admin.database().ref(`/tareas/${userId}`);
-            const snapshot = await tasksRef.once('value');
-            const tasks = snapshot.val();
+            for (const taskId in userTasks) {
+                const task = userTasks[taskId];
+                const { fecha_tarea, email_responsables, descripcion, titulo } = task;
 
-            if (!tasks) {
-                return res.status(404).json({ error: 'No se encontraron tareas para este usuario' });
+                if (fecha_tarea === today) {
+                    const mailOptions = {
+                        from: process.env.EMAIL_USER,
+                        to: Array.isArray(email_responsables) ? email_responsables.join(', ') : email_responsables,
+                        subject: `Recordatorio: ${titulo}`,
+                        text: `Descripción de la tarea: ${descripcion}`,
+                    };
+
+                    try {
+                        await transporter.sendMail(mailOptions);
+                        console.log(`Correo enviado a: ${email_responsables.join(', ')}`);
+                    } catch (error) {
+                        console.error(`Error al enviar correo para la tarea ${taskId}:`, error);
+                    }
+                }
             }
-
-            return res.status(200).json(tasks);
-        } catch (error) {
-            console.error('Error al recuperar las tareas:', error);
-            return res.status(500).json({ error: 'Error al recuperar las tareas' });
         }
+
+        return res.status(200).send('Verificación de tareas completada');
     });
+});
+
+// 5. Función para limpiar tareas vencidas (anterior a la fecha de hoy)
+exports.cleanupOldTasks = functions.https.onRequest(async (req, res) => {
+    const today = new Date().toISOString().split('T')[0]; // Fecha de hoy en formato YYYY-MM-DD
+    console.log('Fecha de hoy:', today);
+
+    const tasksRef = admin.database().ref('/tareas');
+    const snapshot = await tasksRef.once('value');
+    const tasks = snapshot.val();
+
+    if (!tasks) {
+        console.log('No hay tareas para limpiar.');
+        return res.status(200).send('No hay tareas para limpiar.');
+    }
+
+    const updates = {};
+    let tasksDeleted = 0; // Contador de tareas eliminadas
+
+    Object.entries(tasks).forEach(([userId, userTasks]) => {
+        Object.entries(userTasks).forEach(([taskId, task]) => {
+            // Verificar si la tarea es completada y si la fecha es anterior a hoy
+            if (task.estado === 'completada' && task.fecha_tarea < today) {
+                console.log(`Marcando tarea ${taskId} para eliminar (fecha: ${task.fecha_tarea}, estado: completada)`);
+                updates[`/tareas/${userId}/${taskId}`] = null; // Eliminar tarea
+                tasksDeleted++;
+            }
+        });
+    });
+
+    if (tasksDeleted > 0) {
+        await admin.database().ref().update(updates); // Eliminar todas las tareas marcadas
+        console.log(`Tareas eliminadas: ${tasksDeleted}`);
+        return res.status(200).send(`Tareas eliminadas: ${tasksDeleted}`);
+    } else {
+        console.log('No hay tareas completadas antiguas para eliminar');
+        return res.status(200).send('No hay tareas completadas antiguas para eliminar');
+    }
 });
