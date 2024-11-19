@@ -1,0 +1,142 @@
+
+---
+import HomeLayout from "../layouts/HomeLayout.astro";
+---
+
+<HomeLayout title="Bienvenido a LeanMind">
+  <div class="home__container">
+    <div class="card__container">
+      <div class="card__container-up">
+        <div class="card__container-up-left">
+          <h1 class="card__container-up-text">¡Nos alegramos de verte por aquí <span id="username"></span>!</h1>
+          <div class="card__container-up-down-section">
+            <p>“¡Comienza ahora creando un Recordatorio!”</p>
+            <p>Gestiona tus pendientes de forma sencilla y mantén todo 
+              bajo control. Solo necesitas un par de clics para empezar.”</p>
+          </div>
+        </div>
+        <div>
+          <img src="./images/home-image.svg" alt="home-image">
+        </div>
+      </div>
+      <button id="new-reminder" class="new-reminder card__container-button">
+        <img src="./icons/plus-white.svg" alt="new-reminder" />
+        <span>Nuevo Recordatorio</span>
+      </button>
+    </div>
+  </div>
+</HomeLayout>
+
+<script type="module" is:inline src="/src/utils/openReminderForm.js"></script>
+
+<style>
+  .home__container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .card__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    gap: 24px;
+    width: 560px;
+    height: 450px;
+    background: var(--color-white-alt3);
+    border-radius: 24px;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+  }
+
+  .card__container-up {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px;
+    width: 512px;
+    height: 334px;
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+  .card__container-up-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px 10px 0px 0px;
+    font-family: var(--font-monserrat);
+    gap: 32px;
+    margin: 0 auto;
+    width: 280px;
+    flex: none;
+    order: 0;
+    flex-grow: 1;
+  }
+  .card__container-up-text {
+    font-size: 2rem;
+    font-family: var(--font-monserrat);
+    line-height: 40px;
+    font-weight: 600;
+    color: var(--bg-primary);
+  }
+  .card__container-up-down-section{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: var(--font-monserrat);
+  }
+  .card__container-up-down-section>p:first-child{
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .card__container-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 8px;
+    width: 512px;
+    height: 44px;
+    background: var(--bg-color-primary);
+    color: white;
+    border-radius: 8px;
+    flex: none;
+    order: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-monserrat);
+    align-self: stretch;
+    flex-grow: 0;
+    cursor: pointer;
+    border: none;
+  }
+  .card__container-button:hover {
+    opacity: 0.9;
+  }
+</style>
+
+<script>
+  import { userData } from "../stores/store";
+
+  const newRemiderButton = document.getElementById('new-reminder') as HTMLButtonElement
+
+  userData.subscribe((user) => {
+    const userName = document.getElementById("username");
+
+    if (userName) userName.textContent = user.userName.split(" ")[0];
+  });
+
+  newRemiderButton.addEventListener('click',()=>{
+    
+  })
+
+</script>

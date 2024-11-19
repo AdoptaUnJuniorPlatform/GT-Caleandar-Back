@@ -1,0 +1,164 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="login">
+  <div class="grid-container">
+    <div class="image-container"></div>
+    <div class="grid-right">
+      <div class="frame-login">
+        <div class="logo-container">
+          <img 
+            class="image-logo" 
+            src="/images/logo.svg" 
+            alt="Imagen del logo de la empresa LeanMind que es la letra M en mayúscula de color verde"
+          />
+          <div class="logo-text">
+            <h1>LeanMind</h1>
+            <h3>EFFECTIVE DEVELOPMENT</h3>
+          </div>
+        </div>
+        
+        <div class="welcome-title">
+          <p>¡Te damos la <br> Bienvenida!</p>
+        </div>
+        <div class="welcome-text">
+          <p>Estás a un paso <br>
+            de organizar y <br>
+            gestionar tu agenda.
+          </p>
+        </div>
+     
+        <button class="btn-container" id="loginButton">
+          <img 
+            class="letter" 
+            alt="Icono de la letra G en mayúscula" 
+            src="/icons/letter.svg" 
+          />
+          Inicia Sesión con Google
+        </button>
+            
+      </div>
+    </div>
+  </div> 
+</Layout>
+
+<script type="module" is:inline src="/src/utils/validationLogin.js"></script>
+
+<style>
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+  }
+  .image-container {
+    background-image: url('/images/imageLogin.svg');
+    background-size: cover;
+    background-position: center;
+    object-fit: cover;
+  }
+  .grid-right {
+    background-color: #1F636B;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  .frame-login {
+    height: 430px;
+    width: 380px;
+    box-shadow: 3px 1px 9px rgba(0, 0, 0, 0.13); 
+    border-radius: 24px;
+    background-color: #fdfdfd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 8.7px;
+    color: #03707f;
+  } 
+  .logo-container {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    margin-bottom: 6px;
+  }
+  .image-logo {
+    width: 100%;
+    height: 70px;
+  }
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-left: 10px;
+  }
+  .logo-text h1 {
+    color: #39b3c2;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    padding-bottom: 3px;
+    margin: 0;
+  }
+  .logo-text h3 {
+    color: #03707f;
+    font-size: 8px;
+    font-weight: 200;
+    letter-spacing: 2px;
+    margin: 0;
+  }
+  .welcome-title {
+    font-size: 24px;
+    line-height: 30px;
+    font-weight: 600;
+  }
+  .welcome-text {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    color: #828889;
+  }
+  .btn-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    
+  }
+  .btn-container{
+    color: #fff;
+    background-color: #026c7a;
+    border-radius: 8px;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: medium;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 16px 32px;
+    transition: background-color 0.3s ease-in-out;
+    gap: 10px;
+    width: 75%;
+    letter-spacing: 0.8px;
+  }
+  img.letter {
+    height: 14px;
+  }
+  button:hover {
+    background-color: #2a7a80;
+  }
+
+  @media (max-width: 720px) {
+    .grid-container {
+      grid-template-columns: 1fr;
+      background-color: #f5f5f5;
+    }
+  }
+</style>
+
