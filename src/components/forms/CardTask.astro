@@ -1,0 +1,521 @@
+---
+
+---
+
+<div class="modal" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
+  <div class="modal-content">
+    <div class="header-form">
+      <h1 id="modalTitle" class="modal-title" aria-label="Cerrar">
+        Crear Recordatorio
+      </h1>
+      <button id="closeBtn" class="close-btn" aria-label="Cerrar">
+        <img src="/icons/icon-close.svg" alt="Cerrar" class="icon" />
+      </button>
+    </div>
+    <form id="taskForm" class="form-content">
+      <div class="form-group-details">
+        <div class="form-group-title">
+          <input
+            type="text"
+            id="title"
+            name="title"
+            class="input-title"
+            required
+            placeholder="Titulo Recordatorio"
+          />
+          <span class="error" id="titleError"></span>
+        </div>
+        <div class="form-group-calendar">
+          <label for="day" class="label">
+            <img
+              src="/icons/icon-calendar.svg"
+              alt="Calendario icono"
+              class="icon"
+            /> Fecha
+          </label>
+          <div class="custom-date-picker">
+            <input
+              type="date"
+              id="dayStar"
+              name="dayStar"
+              class="input-date"
+              required
+            />
+            <input
+              type="date"
+              id="dayEnd"
+              name="dayEnd"
+              class="input-date"
+              required
+            />
+          </div>
+          <div class="text-date">
+            <span id="start"> Inicio</span>
+            <span id="end"> Fin (Opcional)</span>
+          </div>
+          <div class="form-group-time">
+            <label for="starTime" class="label-time">
+              <img
+                src="/icons/icon-clock.svg"
+                alt="Repite icono"
+                class="icon"
+              /> Hora Inicio
+            </label>
+            <div class="custom-time-picker">
+              <input
+                type="time"
+                id="starTime"
+                name="starTime"
+                class="input-time"
+                required
+              />
+            </div>
+            <span class="error" id="hourError"></span>
+          </div>
+          <span class="error" id="dayError"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="participant" class="label-participant"
+          >Añadir Participante/es (Opcional)</label>
+        <div class="participant">
+          <img
+            src="/icons/icon-users.svg"
+            alt="Participantes icono"
+            class="icon"
+          />
+          <input
+            type="text"
+            id="participant"
+            name="participants"
+            class="input-participant"
+            placeholder="Nombre o email del participante"
+          />
+        </div>
+        <span class="error" id="participantError"></span>
+      </div>
+      <div class="form-group">
+        <label for="repeat" class="label-repeat"
+          >Frecuencia para envío de notificaciones</label
+        >
+        <div class="select-repeat">
+          <img src="/icons/icon-repeat.svg" alt="Alerta icono" class="icon" />
+            <select id="repeat" name="repeat" class="select" required>
+                <option value="" disabled selected>Seleccionar si se repite</option>
+                <option value="noRepeat">Nunca</option>
+                <option value="day">Diariamente</option>
+                <option value="week">Semanalmente (los lunes)</option>
+                <option value="month">Mensual</option>
+                <option value="year">Anual</option>
+                <option value="custom" disabled>Personalizar</option>
+            </select>
+          <span class="error" id="repeatError"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description" class="label-description"> Descripción </label>
+        <textarea
+          id="description"
+          name="description"
+          class="text-description"
+          placeholder="Escribe lo que necesites que te recordemos, ya sea una tarea, reunión, evento, etc."
+          required></textarea>
+          <span class="text-optional">Campo obligatorio</span>
+        <span class="error" id="descriptionError"></span>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="cancelBtn" class="cancel-btn">Cancelar</button>
+        <button type="submit" id="submit-btn" class="submit-btn">Crear Recordatorio</button>
+      </div>
+      <span id="formError" class="error"></span>
+    </form>
+  </div>
+</div>
+
+<script type="module" is:inline src="/src/utils/openReminderForm.js"></script>
+<script type="module" is:inline src="/src/utils/validationForm.js"></script>
+<script type="module" is:inline src="/src/services/handleFormSubmit.js"></script>
+
+
+<style>
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(218, 218, 218, 0.815);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal.is-active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: #fefefe;
+    border-radius: 16px;
+    width: 600px;
+    height: auto;
+    box-shadow: 0px 1px 2px 0px rgba(41, 79, 84, 0.21);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px; 
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 24px;
+    color: #566E73;
+    font-family: var(--font-montserrat);
+  }
+
+  .label-participant,
+  .label-repeat,
+  .label-description {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 32px;
+    color: #207881;
+    font-family: var(--font-montserrat);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 14px;
+  }
+
+  .form-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .header-form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-primary);
+    line-height: 16px;
+  }
+
+  .error {
+    color: red;
+    font-size: 10px;
+  }
+
+  .form-group-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    background: #EDF0F1;
+    border-radius: 4px;
+  }
+
+  .form-group-date {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .form-group-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    background: #fefefe;
+    border-radius: 4px;
+    padding: 12px;
+    box-sizing: border-box;
+    flex-grow: 1;
+  }
+
+  .form-group-reminder {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .form-group-calendar {
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  .input-date {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    background: #fefefe;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2C97A0;
+    appearance: none;
+    border: 1px solid rgb(237, 240, 241);
+    font-family: var(--font-montserrat);
+    cursor: pointer;
+  }
+
+  .input-date:invalid {
+    color: #ADCBCC;
+  }
+
+  #dayEnd {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("icons/icon-arrow.svg");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  #dayStar{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("icons/icon-arrow.svg");
+    background-repeat: no-repeat;
+    background-position: left 255px center;
+  }
+  .custom-date-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 13px;
+    margin-top: 8px;
+  }
+
+  .text-date {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-family: var(--font-montserrat);
+    font-weight: 500;
+    line-height: 16px;
+    color: #566E73;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  #end {
+    margin-right: 190px;
+  }
+
+  .input-date::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .input-time {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    background: #fefefe;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2C97A0;
+    appearance: none;
+    border: none;
+    font-family: var(--font-montserrat);
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("icons/icon-arrow.svg");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  .input-time:invalid {
+    color: #ADCBCC;
+  }
+  .custom-time-picker {
+    position: relative;
+    display: flex;
+    margin-top: 11px;
+  }
+
+  .input-time::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0;
+  }
+
+  .participant {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    align-self: stretch;
+    padding: 8px;
+    gap: 8px;
+    border-radius: 4px;
+    background: #EDF0F1;
+    box-sizing: border-box;
+  }
+
+  .input-participant {
+    border-radius: 4px;
+    background: #fefefe;
+    width: 100%;
+    font-size: 14px;
+    color: #207881;
+    font-weight: 500;
+    line-height: 24px;
+    padding: 8px;
+    border: none;
+    font-family: var(--font-montserrat);
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .input-participant::placeholder {
+    color: #d7dfe0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 24px;
+    font-family: var(--font-montserrat);
+  }
+
+  .input-title {
+    border-radius: 4px;
+    background: #fefefe;
+    width: 100%;
+    font-size: 18px;
+    color: #2c97a0;
+    font-weight: 600;
+    border: none;
+    box-sizing: border-box;
+    font-family: var(--font-montserrat);
+  }
+  .input-title::placeholder {
+    color: #2c97a0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 32px;
+    font-family: var(--font-montserrat);
+    opacity: 0.4;
+  }
+  .select {
+    width: 100%;
+    border-radius: 4px;
+    padding: 8px; 
+    background: #fefefe;
+    border: none;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+    color: #45B5BC;
+    cursor: pointer;
+    font-family: var(--font-montserrat);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("icons/icon-arrow.svg");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    box-sizing: border-box;
+  }
+
+  .select:invalid {
+    color: #ADCBCC;
+  }
+  .select-repeat {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    gap: 8px;
+    border-radius: 4px;
+    padding: 8px 0px 8px 8px;;
+    background: #EDF0F1;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .text-description {
+    width: 100%;
+    height: 100px;
+    border-radius: 4px;
+    margin-top: 10px;
+    background: #fefefe;
+    font-size: 14px;
+    color: #2C97A0;
+    font-weight: 400;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    border: 1px solid #edf0f1;
+    font-family: var(--font-montserrat);
+  }
+
+  .text-optional {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+    color: #B3C3C6;
+    font-family: var(--font-montserrat);
+  }
+
+  .text-description::placeholder {
+    color: #d7dfe0;
+    font-size: 14px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 32px;
+  }
+
+  .form-actions button {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 24px;
+    font-family: var(--font-montserrat);
+    flex: 1 0 0;
+  }
+
+  .submit-btn {
+    background: #1f636b;
+    color: #fafafa;
+    cursor: pointer;
+  }
+
+  .cancel-btn {
+    background: #9BB0B3;
+    color: #D7DFE0;
+    cursor: pointer;
+  }
+</style>

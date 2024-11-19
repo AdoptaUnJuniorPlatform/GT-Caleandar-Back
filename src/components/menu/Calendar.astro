@@ -1,0 +1,154 @@
+---
+
+---
+
+<div class="calendar">
+  <header class="calendar-header">
+    <button class="nav-btn" id="prev-month"><img src="./icons/arrow-left.svg" alt="arrow-left"></button>
+    <h2 id="current-date" class="text-date"></h2>
+    <button class="nav-btn" id="next-month"><img src="./icons/arrow-right.svg" alt="arrow-right"></button>
+  </header>
+
+  <div class="calendar-body">
+    <div class="weekdays">
+      <div>L</div>
+      <div>M</div>
+      <div>X</div>
+      <div>J</div>
+      <div>V</div>
+      <div class="weekend">S</div>
+      <div class="weekend">D</div>
+    </div>
+
+    <div class="days" id="days-grid"></div>
+  </div>
+</div>
+
+<script>
+  import { fecha } from '../../stores/store'
+  const months = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  const weekdays = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
+
+  let currentDate = new Date();
+  const monthYear = document.getElementById("current-month") as HTMLElement;
+  const fullDate = document.getElementById("current-date") as HTMLElement;
+  const daysGrid = document.getElementById("days-grid") as HTMLElement;
+
+  function getCalendarString(date:Date){
+    return `${weekdays[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()].toWellFormed().slice(0,3)}, ${date.getFullYear()}`
+  }
+
+  function updateCalendar() {
+
+    fullDate.textContent = getCalendarString(currentDate);
+
+    daysGrid.innerHTML = "";
+
+    const firstDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const lastDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+
+    let firstDayIndex = firstDay.getDay() - 1;
+    if (firstDayIndex === -1) firstDayIndex = 6;
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      const dayElement = document.createElement("div");
+      dayElement.classList.add("day", "disabled");
+      daysGrid.appendChild(dayElement);
+    }
+
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const dayElement = document.createElement("div");
+      dayElement.classList.add("day");
+      if (
+        i === currentDate.getDate() &&
+        currentDate.getMonth() === new Date().getMonth() &&
+        currentDate.getFullYear() === new Date().getFullYear()
+      ) {
+        dayElement.classList.add("selected");
+      }
+      const dayOfWeek = (firstDayIndex + i - 1) % 7;
+      if (dayOfWeek === 5 || dayOfWeek === 6) {
+        dayElement.onclick = null
+        dayElement.classList.add("weekend");
+      }
+      dayElement.textContent = i.toString();
+
+      const dayId = `day-${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`;
+      dayElement.id = dayId;
+
+      dayElement.addEventListener("click", () => displaySelectedDate(dayId));
+
+      daysGrid.appendChild(dayElement);
+    }
+  }
+
+  function changeMonth(delta: number) {
+    currentDate.setMonth(currentDate.getMonth() + delta);
+    updateCalendar();
+    if(currentDate.getMonth() == new Date().getMonth() && currentDate.getFullYear() == new Date().getFullYear()){
+      fullDate.textContent =  getCalendarString(currentDate);
+    }else{
+      fullDate.textContent = 'Selecciona un dia'
+    }
+  }
+
+  function displaySelectedDate(dayId: string) {
+    const selected = document.getElementById(dayId) as HTMLElement;
+    const selectedDate = document.getElementById(
+      "selected-date"
+    ) as HTMLElement;
+    document
+      .querySelectorAll(".day.selected")
+      .forEach((el) => el.classList.remove("selected"));
+    selected.classList.add("selected");
+    const [year, month, day] = dayId.split('-').slice(1, 4).map(Number);
+    const date = new Date(year, month - 1, day);
+    fecha.set(date)
+    fullDate.textContent = getCalendarString(date)
+
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const prevMonth = document.getElementById(
+      "prev-month"
+    ) as HTMLButtonElement;
+    const nextMonth = document.getElementById(
+      "next-month"
+    ) as HTMLButtonElement;
+
+    updateCalendar();
+
+    prevMonth.addEventListener("click", () => changeMonth(-1));
+    nextMonth.addEventListener("click", () => changeMonth(1));
+  });
+</script>

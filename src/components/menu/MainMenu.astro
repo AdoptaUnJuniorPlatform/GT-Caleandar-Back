@@ -1,0 +1,96 @@
+---
+import Calendar from "./Calendar.astro";
+---
+
+<div class="menu__container">
+  <div class="full-menu">
+    <Calendar />
+    <div class="menu__list">
+      <span class="menu__text">Mi Área Personal</span>
+      <hr class="menu__divider" />
+      <a href="/reminders" class="menu__item"><div class="home__icon-space"><img src="/icons/bell.svg" alt="bell-icon">  Mis Recordatorios</div>  <span class="item__count">0</span></a>
+      <a href="/calendar" class="menu__item"><div class="home__icon-space"><img src="/icons/calendar.svg" alt="calendar-icon">  Calendario</div></a>
+    </div>
+  </div>
+  <button id="new-reminder" class="new-reminder new__button-reminder">
+    <img src="./icons/plus.svg" alt="new-reminder">
+    <span>Nuevo Recordatorio</span>
+  </button>
+</div>
+
+<script type="module" is:inline src="/src/utils/openReminderForm.js"></script>
+
+<style>
+  .menu__container {
+    padding: 24px 1rem 32px 20px;
+    width: 280px;
+    height: 100%;
+    flex: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--color-white-alt);
+  }
+  .full-menu{
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .new__button-reminder{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: .5rem;
+    padding: 12px 16px;
+    font-family: var(--font-monserrat);
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    background: var(--color-gray-alt2);
+  }
+  .new__button-reminder:hover{
+    background: color-mix(in srgb, var(--color-gray-alt2) 90%, white 30%);
+  }
+  .menu__text{
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-gray);
+    font-family: var(--font-monserrat);
+  }
+  .menu__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .menu__item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: .5rem;
+    border-radius: .5rem;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-family: var(--font-monserrat);
+  }
+  .menu__item:hover{
+    outline: 2px solid var(--color-primary)
+  }
+  .item__count{
+    color: var(--color-text-primary);
+  }
+  .menu__divider {
+    border-color: var(--color-line-gray);
+  }
+  .home__icon-space{
+    display: flex;
+    flex-direction: row;
+    gap: 11px;
+    align-items: center;
+  }
+</style>

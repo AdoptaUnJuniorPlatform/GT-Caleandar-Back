@@ -1,0 +1,150 @@
+<header class="header">
+  <div class="logo__section">
+    <img src="/images/logo.svg" alt="logo" class="logo__picture" />
+    <div class="text__container">
+      <p class="text__primary">LeanMind</p>
+      <p class="text__secondary">EFFECTIVE DEVELOPMENT</p>
+    </div>
+  </div>
+    <div class="user-desc__section">
+      <img
+        id="userPhoto"
+        src="/images/default-user-img.png"
+        alt="user-image"
+        class="profile__image"
+      />
+      <button class="button__down">
+        <img
+          src="/icons/arrow-down.svg"
+          alt="user-image"
+          class="arrow-down__image"
+        />
+      </button>
+    </div>
+</header>
+
+<style>
+  .header {
+    height: 56px;
+    padding: 10px 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid gray;
+  }
+  .logo__section {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+  .logo__picture {
+    width: 40px;
+    height: 40px;
+  }
+  .text__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+  .text__primary {
+    font-size: 24px;
+    font-weight: 400;
+    font-family: "Inter", sans-serif;
+    color: var(--color-primary);
+  }
+  .text__secondary {
+    font-size: 7px;
+    color: var(--color-secondary);
+  }
+
+  /* user section */
+  .user-desc__section {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+  }
+  .profile__image {
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    object-fit: cover;
+  }
+  .arrow-down__image {
+    width: 8px;
+    height: 4px;
+  }
+  .button__down{
+    background-color: transparent;
+    border: none;
+  }
+
+  @media (min-width: 768px) {
+    .search-container {
+      display: flex;
+      width: 200px;
+    }
+  }
+
+  @media (min-width: 850px) {
+    .search-container {
+      display: flex;
+      width: 300px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .search-container {
+      display: flex;
+      width: 495px;
+    }
+  }
+</style>
+
+<script>
+  import { auth } from '../../static/js/firebaseconfig';
+  import { onAuthStateChanged, signOut } from 'firebase/auth';
+  import { userData } from '../../stores/store'
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const userPhoto = document.getElementById('userPhoto') as HTMLImageElement | null;
+      const userName = document.getElementById('userName');
+      const userEmail = document.getElementById('userEmail');
+
+      if (userPhoto) userPhoto.src = user.photoURL || ''; 
+      if (userName) userName.textContent = `${user.displayName}`;
+      if (userEmail) userEmail.textContent = `${user.email}`;
+
+      userData.set(
+        {
+          userPhoto: user.photoURL || '',
+          userName: user.displayName!,
+          userEmail: user.email!
+        }
+      )
+
+    } else {
+      window.location.href = '/login';
+    }
+  });
+
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        userData.set(
+        {
+          userPhoto: '',
+          userName: '',
+          userEmail: ''
+        }
+      )
+        window.location.href = '/login';
+      }).catch((error) => {
+        console.error('Error al cerrar sesión:', error);
+      });
+    });
+  }
+</script>
