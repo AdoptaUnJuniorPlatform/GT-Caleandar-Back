@@ -1,0 +1,197 @@
+---
+import CardTask from "../components/forms/CardTask.astro";
+import Header from "../components/layouts/Header.astro";
+import MainMenu from "../components/menu/MainMenu.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Header />
+    <main class="main__container">
+      <MainMenu />
+      <div class="container">
+        <CardTask />
+        <slot />
+      </div>
+    </main>
+  </body>
+</html>
+<style is:global>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+  :root {
+    --color-primary: #39b3c2;
+    --color-secondary: #9cd9e1;
+
+    --color-gray: #7c8889;
+    --color-line-gray: #e3eaeb;
+    --color-text-primary: #2f3030;
+    
+    --color-gray-alt: #eaf1f2;
+    --color-gray-alt2: #9BB0B3;
+    
+    --color-white-alt2: #FBFFFF;
+    --color-white-alt3: #FEFEFE;
+    --bg-color-rgba-primary: rgb(29, 90, 97);
+    --bg-color-primary: #1D5A61;
+    --border-color: #11363A;
+    
+    --bg-primary: #026c7a;
+    --bg-gray-primary: #f9f9f9;
+
+    --font-inter: "Inter", sans-serif;
+    --font-monserrat: "Montserrat", sans-serif;
+    --font-monserrat-alt: "Montserrat Alternates", sans-serif;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    height: 100%;
+    font-family: system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main__container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  }
+
+  .container {
+    flex-grow: 1;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+  }
+  .calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .calendar-header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .text-date {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--font-monserrat);
+  }
+
+  .calendar-body {
+    background: var(--color-gray-alt);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  #current-month {
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-monserrat);
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    color: #026C7A;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-monserrat);
+  }
+
+  .weekend {
+    color: #94a3b8;
+  }
+
+  .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: var(--font-monserrat);
+    background-color: var(--color-white-alt2);
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 8px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+
+  .day:hover:not(.disabled) {
+    background-color: #CCDDDD;
+  }
+
+  .day.disabled {
+    color: #cbd5e1;
+    cursor: default;
+  }
+
+  .day.selected {
+    background-color: #323333;
+    color: var(--color-primary);
+  }
+
+  .day.weekend {
+    color: #94a3b8;
+    background-color: rgb(255, 204, 209, .25) ;
+  }
+  .day.weekend.selected{
+    color: var(--color-white-alt2);
+    background-color: #adadad;
+  }
+
+  #selected-date {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+</style>
