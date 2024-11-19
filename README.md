@@ -1,5 +1,7 @@
 # Proyecto en Astro para realizar pruebas del backend
 
+NOTA: ACTUALIZADO CON LAS FUNCIONES Y LA MODULACION
+
 Para iniciar el proyecto:
 1. Clonar repositorio
 2. Navegar a la raiz del proyecto e instalar dependencias:
