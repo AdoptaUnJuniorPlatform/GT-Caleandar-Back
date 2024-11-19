@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Tareas</title>
+    
+    <!-- Importar los módulos necesarios de Firebase desde el CDN -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+      import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+      import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+      // Configuración de Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyCNvRFL-YT9Pby9u5Oz8Z_cTr6kZRX5rKk",  // PUBLIC_API_KEY
+        authDomain: "caleandar-leanmind.firebaseapp.com",  // PUBLIC_AUTH_DOMAIN
+        databaseURL: "https://caleandar-leanmind-default-rtdb.europe-west1.firebasedatabase.app",  // PUBLIC_DATABASE_URL
+        projectId: "caleandar-leanmind",  // PUBLIC_PROJECT_ID
+        storageBucket: "caleandar-leanmind.appspot.com",  // PUBLIC_STORAGE_BUCKET
+        messagingSenderId: "61171199093",  // PUBLIC_MESSAGING_SENDER_ID
+        appId: "1:61171199093:web:0d91f9edb0594de9cd1c3c",  // PUBLIC_APP_ID
+        measurementId: "G-C3JM55JMXL"
+      };
+
+      // Inicializar Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Función asíncrona para manejar la carga de tareas
+      async function loadTasks() {
+        let tareas = [];
+        let errorMessage = null;
+        let userId = null;
+
+        try {
+          // Verificar si el usuario está autenticado
+          const user = await new Promise((resolve, reject) => {
+            onAuthStateChanged(auth, (user) => {
+              if (user) {
+                console.log("Usuario autenticado, userId:", user.uid); // Verifica que el usuario esté autenticado
+                resolve(user.uid); // El usuario está autenticado
+              } else {
+                console.log("No autenticado"); // Si no está autenticado, también lo logueamos
+                reject("No autenticado");
+              }
+            });
+          });
+
+          userId = user; // Guardamos el userId
+
+          // Hacer la llamada al backend para obtener las tareas
+          const response = await fetch(`http://127.0.0.1:5001/caleandar-leanmind/us-central1/getTasksByUserId?userId=${userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            // Transformar el objeto de Firebase en un array
+            tareas = Object.values(data);
+            console.log("Tareas recibidas:", tareas);  // Verifica las tareas recibidas
+          } else {
+            errorMessage = "Error al cargar las tareas";
+          }
+
+        } catch (error) {
+          // Manejo de errores, si el usuario no está autenticado
+          if (error === "No autenticado") {
+            errorMessage = "No estás autenticado. Por favor, inicia sesión.";
+          } else {
+            errorMessage = "Hubo un problema al cargar las tareas. Intenta nuevamente.";
+          }
+        }
+
+        // Renderizar el contenido de tareas
+        const tasksContainer = document.getElementById('tasks-container');
+        console.log("Contenedor de tareas:", tasksContainer);  // Verifica si el contenedor existe
+
+        if (!tasksContainer) {
+          console.error("No se encontró el contenedor de tareas");
+          return;  // Si no se encuentra el contenedor, salimos de la función
+        }
+
+        if (errorMessage) {
+          tasksContainer.innerHTML = `
+            <div class="alert alert-warning">
+              <p>${errorMessage}</p>
+              ${errorMessage.includes("No estás autenticado") ? '<a href="/login">Inicia sesión aquí</a>' : ''}
+            </div>
+          `;
+        } else {
+          // Verifica que las tareas sean correctas antes de inyectarlas
+          console.log("Tareas a mostrar:", tareas);
+
+          tasksContainer.innerHTML = tareas.length > 0
+            ? tareas.map((tarea) => {
+              return `
+                <li>
+                  <h2>${tarea.titulo || 'Sin título'}</h2>
+                  <p>${tarea.descripcion || 'Sin descripción'}</p>
+                  <p>Fecha de tarea: ${tarea.fecha_tarea || 'Fecha no disponible'}</p>
+                </li>
+              `;
+            }).join('') // Renderiza las tareas filtradas
+            : '<p>No se encontraron tareas.</p>';
+        }
+      }
+
+      // Llamar a la función para cargar las tareas
+      document.addEventListener('DOMContentLoaded', loadTasks);
+    </script>
+  </head>
+  <body>
+    <h1>Mis Tareas</h1>
+    <ul id="tasks-container"></ul>
+  </body>
+</html>

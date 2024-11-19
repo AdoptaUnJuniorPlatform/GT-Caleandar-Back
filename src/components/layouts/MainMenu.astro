@@ -1,0 +1,75 @@
+<div class="menu__container">
+   <button class="new-task__button">
+    <a href="/formuprueba2" style="display: flex; align-items: center; gap: 1rem;">
+      <img src="/icons/plus.svg" alt="button_plus" class="new-task__icon" />
+      Crear
+    </a>
+  </button>
+  <div class="menu__list">
+    <a href="#" class="menu__item">Inicio</a>
+    <a href="#" class="menu__item">Mis tareas LeaN <span class="item__count">7</span></a>
+    <a href="#" class="menu__item">Bandeja de Entrada <span class="item__count">7</span></a>
+    <hr class="menu__divider" />
+    <a href="#" class="menu__item">Calendario</a>
+  </div>
+</div>
+
+<style>
+  .menu__container {
+    padding: 2rem;
+    max-width: 325px;
+    height: 100%;
+    flex: auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+  }
+  .new-task__button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 120px;
+    height: 40px;
+    border-radius: 1rem;
+    border: 1px solid var(--color-primary);
+    background: transparent;
+    font-family: var(--font-monserrat);
+    color: white;
+  }
+  .new-task__icon {
+    width: 2rem;
+    height: 2rem;
+  }
+  .menu__list {
+    margin-top: 128px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .menu__item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: .5rem;
+    border-radius: 1rem;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    font-family: var(--font-monserrat);
+  }
+  .item__count{
+    color: var(--color-primary);
+  }
+  .menu__item:hover{
+    background: var(--color-primary);
+  }
+  .menu__divider {
+    border-color: var(--color-primary);
+  }
+</style>
