@@ -3,6 +3,7 @@ const transporter = require('../config/mailConfig');
 const { sendTaskReminder } = require('./mailHandler');
 const cors = require('../middleware/corsMiddleware');
 const { formatDate, isToday, isBeforeToday } = require('../utils/dateUtils');
+const { convertirEstado, convertirPeriodicidad } = require('../utils/taskUtils');
 
 // 1. Crear una nueva tarea, guardarla en Firebase y enviar correos si la fecha es hoy
 
@@ -144,6 +145,7 @@ const endDatos = async (req, res) => {
 
 
 // 2. Obtener las tareas de un usuario por ID
+
 const getTasksByUserId = async (req, res) => {
     cors(req, res, async () => {
         if (req.method !== 'GET') return res.status(405).json({ error: 'Método no permitido' });
@@ -155,31 +157,32 @@ const getTasksByUserId = async (req, res) => {
             const tasksRef = admin.database().ref(`/tareas/${userId}`);
             const snapshot = await tasksRef.once('value');
             const tasks = snapshot.val();
+
             if (!tasks) return res.status(404).json({ error: 'No se encontraron tareas para este usuario' });
 
             // Convertir los índices de estado y periodicidad a nombres
-            const formattedTasks = Object.fromEntries(
-                Object.entries(tasks).map(([taskId, task]) => {
-                    // Convertir estado a nombre
-                    const estadoNombre = indice_estados[task.estado] || task.estado;
-                    // Convertir periodicidad a nombre
-                    const periodicidadNombre = indice_periodicidad[task.periodicidad?.tipo] || task.periodicidad?.tipo;
+            const formattedTasks = Object.entries(tasks).map(([taskId, task]) => {
+                // Convertir estado a nombre usando la función externa
+                const estadoNombre = convertirEstado(task.estado);
 
-                    return [
-                        taskId,
-                        {
-                            ...task,
-                            estado: estadoNombre,
-                            periodicidad: {
-                                ...task.periodicidad,
-                                tipo: periodicidadNombre
-                            }
-                        }
-                    ];
-                })
-            );
+                // Convertir periodicidad a nombre usando la función externa
+                const periodicidadNombre = convertirPeriodicidad(task.frecuencia);
 
-            return res.status(200).json(formattedTasks);
+                // Devolver solo los campos que queremos mostrar, excluyendo taskId y frecuencia.tipo
+                return {
+                    titulo: task.titulo,                // Mostrar el titulo primero
+                    descripcion: task.descripcion,
+                    email_responsables: task.email_responsables,
+                    estado: estadoNombre,
+                    fecha_fin: task.fecha_fin,
+                    fecha_tarea: task.fecha_tarea,
+                    hora: task.hora,
+                    fecha_recordatorio: task.fecha_recordatorio || "",
+                    periodicidad: periodicidadNombre
+                };
+            });
+
+            return res.status(200).json({ tasks: formattedTasks });
         } catch (error) {
             console.error('Error al recuperar las tareas:', error);
             return res.status(500).json({ error: 'Error al recuperar las tareas' });
@@ -187,20 +190,25 @@ const getTasksByUserId = async (req, res) => {
     });
 };
 
-// 3. Actualizar una tarea existente
+
+// 3. Actualizar una tarea existente ( Aun por optimizar)
+
+
 const updateTask = async (data, context) => {
     // Verificar si el usuario está autenticado
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'El usuario no está autenticado');
     }
 
-    const { userId, tareaId, descripcion, email_responsables, estado, fecha_inicio, titulo, periodicidad } = data;
+    const userId = context.auth.uid;  // Obtener el userId del contexto de autenticación
+    const tareaId = data.tareaId;  // Obtener el tareaId desde el cuerpo de la solicitud
 
-    // Verificar que se haya proporcionado el userId y tareaId
-    if (!userId || !tareaId) {
-        throw new functions.https.HttpsError('invalid-argument', 'Faltan datos importantes: userId o tareaId');
+    // Verificar que se haya proporcionado el tareaId
+    if (!tareaId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Falta el campo tareaId');
     }
 
+    // Asegurarse de que el usuario solo pueda modificar sus propias tareas
     const taskRef = admin.database().ref(`/tareas/${userId}/${tareaId}`);
     const taskSnapshot = await taskRef.once('value');
 
@@ -209,15 +217,30 @@ const updateTask = async (data, context) => {
         throw new functions.https.HttpsError('not-found', 'La tarea no existe');
     }
 
+    // Verificar que la tarea pertenece al usuario actual
+    const taskData = taskSnapshot.val();
+    if (taskData.usuario_id !== userId) {
+        throw new functions.https.HttpsError('permission-denied', 'No tienes permisos para modificar esta tarea');
+    }
+
     // Preparar los datos actualizados para la tarea
-    const updatedTaskData = {
-        ...(descripcion && { descripcion }),
-        ...(email_responsables && { email_responsables: email_responsables.split(',') }),
-        ...(estado && { estado: parseInt(estado, 10) }),  // Convertir a número si es necesario
-        ...(fecha_inicio && { fecha_inicio }),
-        ...(titulo && { titulo }),
-        ...(periodicidad && { periodicidad: { tipo: parseInt(periodicidad.tipo, 10) } })  // Convertir periodicidad a número
-    };
+    const updatedTaskData = {};
+
+    // Validar y actualizar campos
+    if (data.descripcion) updatedTaskData.descripcion = data.descripcion;
+    if (data.email_responsables) updatedTaskData.email_responsables = data.email_responsables.split(',');
+    if (data.estado !== undefined) updatedTaskData.estado = parseInt(data.estado, 10);  // Convertir a número si es necesario
+    if (data.fecha_inicio) updatedTaskData.fecha_inicio = data.fecha_inicio;
+    if (data.titulo) updatedTaskData.titulo = data.titulo;
+    
+    // Validar y actualizar la periodicidad
+    if (data.periodicidad && data.periodicidad.tipo !== undefined) {
+        updatedTaskData.periodicidad = {
+            tipo: parseInt(data.periodicidad.tipo, 10),
+            dia_inicio: data.periodicidad.dia_inicio,
+            n_semanas: data.periodicidad.n_semanas
+        };
+    }
 
     try {
         // Actualizar la tarea en la base de datos
@@ -233,6 +256,28 @@ const updateTask = async (data, context) => {
         throw new functions.https.HttpsError('internal', 'Error al actualizar la tarea', error);
     }
 };
+
+// Envolver la función con CORS para permitir solicitudes desde cualquier origen
+exports.updateTask = functions.https.onRequest((req, res) => {
+    cors(req, res, async () => {
+        // Asegurarse de que la solicitud es un POST (actualización de datos)
+        if (req.method !== 'POST') {
+            return res.status(405).send('Método no permitido');
+        }
+
+        try {
+            const data = req.body;
+            const context = req; // En un entorno real de Firebase Functions, `context` se maneja automáticamente
+
+            const result = await updateTask(data, context);
+            return res.status(200).send(result);  // Retornar el resultado de la función
+
+        } catch (error) {
+            console.error('Error al procesar la solicitud', error);
+            return res.status(500).send('Error al procesar la solicitud');
+        }
+    });
+});
 
 // 4. Verificar tareas diarias y enviar recordatorios
 const verifyDailyTasks = async (req, res) => {
