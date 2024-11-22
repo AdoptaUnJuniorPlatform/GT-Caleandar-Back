@@ -4,6 +4,8 @@ const { sendTaskReminder } = require('./mailHandler');
 const cors = require('../middleware/corsMiddleware');
 const { formatDate, isToday, isBeforeToday } = require('../utils/dateUtils');
 const { convertirEstado, convertirPeriodicidad } = require('../utils/taskUtils');
+const functions = require('firebase-functions');
+
 
 // 1. Crear una nueva tarea, guardarla en Firebase y enviar correos si la fecha es hoy
 
@@ -11,36 +13,26 @@ const endDatos = async (req, res) => {
     cors(req, res, async () => {
         if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-        console.log("Datos recibidos del frontend: ", req.body); // Añadir esto para ver los datos
+        console.log("Datos recibidos del frontend: ", req.body);
 
         // Mapeo de los campos recibidos del frontend a los nombres esperados por el backend
         let {
-            title,           // frontend: title -> backend: titulo
-            dayStar,         // frontend: dayStar -> backend: fecha_inicio
-            dayEnd,          // frontend: dayEnd -> backend: fecha_fin
-            starTime,        // frontend: starTime -> backend: hora
-            participants,    // frontend: participants -> backend: email_responsables
-            description,     // frontend: description -> backend: descripcion
-            repeat,          // frontend: repeat -> backend: periodicidad
-            userId,          // backend: userId (no cambia)
-            estado = 0,      // Asignamos 0 como valor por defecto para "pendiente"
-            dia_inicio,      // frontend: (en caso de periodicidad "week")
-            n_semanas,       // frontend: (en caso de periodicidad "week")
-            fecha_recordatorio = "" // Correcta asignación del valor por defecto (cadena vacía)
+            title,               // frontend: title -> backend: titulo
+            dayStar,             // frontend: dayStar -> backend: fecha_inicio
+            dayEnd,              // frontend: dayEnd -> backend: fecha_fin
+            starTime,            // frontend: starTime -> backend: hora
+            participants,        // frontend: participants -> backend: email_responsables
+            description,         // frontend: description -> backend: descripcion
+            userId,              // backend: userId (no cambia)
+            estado = 0,          // Asignamos 0 como valor por defecto para "pendiente"
+            dia_inicio,          // frontend: (en caso de periodicidad "week")
+            n_semanas,           // frontend: (en caso de periodicidad "week")
+            fecha_recordatorio = "", // Correcta asignación del valor por defecto (cadena vacía)
+            frequencyData        // El objeto que contiene 'frequency'
         } = req.body;
 
-        // Establecer el valor de repeat a 0 si no se da o si se recibe "noRepeat"
-        if (!repeat || repeat === 'noRepeat') {
-            repeat = '0'; // Convertir 'noRepeat' a '0'
-        } else if (repeat === 'day') {
-            repeat = '1'; // Convertir 'day' a '1'
-        } else if (repeat === 'week') {
-            repeat = '2'; // Convertir 'week' a '2'
-        } else if (repeat === 'month') {
-            repeat = '3'; // Convertir 'month' a '3'
-        } else if (repeat === 'year') {
-            repeat = '4'; // Convertir 'year' a '4'
-        }
+        // Usar el valor de frequency directamente
+        let repeat = frequencyData ? frequencyData.frequency : '0'; // Usamos 'frequency' directamente
 
         // Asignar '1' (lunes) a dia_inicio si se selecciona 'week' y no se proporciona valor
         if (repeat === '2' && !dia_inicio) {
@@ -104,12 +96,12 @@ const endDatos = async (req, res) => {
         let frecuencia = { tipo: repeat };
 
         if (repeat === '2') { // Si la periodicidad es semanal
-            frecuencia.dia_inicio = dia_inicio || 1; // Asignar el lunes por defecto si no se proporciona
-            frecuencia.n_semanas = n_semanas || 1; // Si no se especifica, asigna 1 semana por defecto
+            frecuencia.dia_inicio = frequencyData.weekDays || [1]; // Guardamos los días de la semana (default lunes)
+            frecuencia.n_semanas = frequencyData.repeatEvery || 1; // Guardamos el número de semanas (default 1)
         }
 
         // Crear un nuevo objeto de tarea para guardarlo en Firebase
-        const taskRef = admin.database().ref(`/tareas/${userId}`).push();  // Corregido aquí
+        const taskRef = admin.database().ref(`/tareas/${userId}`).push();  
         const taskData = {
             descripcion: description,               // Mapeo de description -> descripcion
             email_responsables: participants,        // Mapeo de participants -> email_responsables (ya es un array)
@@ -144,6 +136,7 @@ const endDatos = async (req, res) => {
 };
 
 
+
 // 2. Obtener las tareas de un usuario por ID
 
 const getTasksByUserId = async (req, res) => {
@@ -166,11 +159,11 @@ const getTasksByUserId = async (req, res) => {
                 const estadoNombre = convertirEstado(task.estado);
 
                 // Convertir periodicidad a nombre usando la función externa
-                const periodicidadNombre = convertirPeriodicidad(task.frecuencia);
+                const periodicidadNombre = task.frecuencia ? convertirPeriodicidad(task.frecuencia) : 'No especificado';
 
                 // Devolver solo los campos que queremos mostrar, excluyendo taskId y frecuencia.tipo
                 return {
-                    titulo: task.titulo,                // Mostrar el titulo primero
+                    titulo: task.titulo,
                     descripcion: task.descripcion,
                     email_responsables: task.email_responsables,
                     estado: estadoNombre,
@@ -257,27 +250,6 @@ const updateTask = async (data, context) => {
     }
 };
 
-// Envolver la función con CORS para permitir solicitudes desde cualquier origen
-exports.updateTask = functions.https.onRequest((req, res) => {
-    cors(req, res, async () => {
-        // Asegurarse de que la solicitud es un POST (actualización de datos)
-        if (req.method !== 'POST') {
-            return res.status(405).send('Método no permitido');
-        }
-
-        try {
-            const data = req.body;
-            const context = req; // En un entorno real de Firebase Functions, `context` se maneja automáticamente
-
-            const result = await updateTask(data, context);
-            return res.status(200).send(result);  // Retornar el resultado de la función
-
-        } catch (error) {
-            console.error('Error al procesar la solicitud', error);
-            return res.status(500).send('Error al procesar la solicitud');
-        }
-    });
-});
 
 // 4. Verificar tareas diarias y enviar recordatorios
 const verifyDailyTasks = async (req, res) => {
