@@ -177,7 +177,7 @@ const getTasksByUserId = async (req, res) => {
 
                 // Devolver solo los campos que queremos mostrar, excluyendo taskId y frecuencia.tipo
                 return {
-                    titulo: task.titulo,                // Mostrar el titulo primero
+                    titulo: task.titulo,               
                     descripcion: task.descripcion,
                     email_responsables: task.email_responsables,
                     estado: estadoNombre,
