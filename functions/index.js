@@ -1,8 +1,7 @@
 // functions/index.js
 const functions = require('firebase-functions');
 const cors = require('./middleware/corsMiddleware');
-const { endDatos, getTasksByUserId, updateTask, } = require('./handlers/taskHandler');
-const { verifyDailyTasks, cleanupOldTasks } = require('./handlers/reminderHandler');
+const { endDatos, getTasksByUserId, updateTask, verifyReminderTasks, cleanupOldTasks } = require('./handlers/taskHandler');
 
 
 // Usando CORS middleware en las funciones HTTP
@@ -11,5 +10,5 @@ exports.getTasksByUserId = functions.https.onRequest((req, res) => cors(req, res
 
 // Aquí usamos onCall para la función de actualización de tarea
 exports.updateTask = functions.https.onCall(updateTask);  // Esta función es callable, por lo tanto, no se usa con req/res
-exports.verifyDailyTasks = functions.https.onRequest((req, res) => cors(req, res, () => verifyDailyTasks(req, res)));
+exports.verifyReminderTasks = functions.https.onRequest((req, res) => cors(req, res, () => verifyReminderTasks(req, res)));
 exports.cleanupOldTasks = functions.https.onRequest((req, res) => cors(req, res, () => cleanupOldTasks(req, res)));
