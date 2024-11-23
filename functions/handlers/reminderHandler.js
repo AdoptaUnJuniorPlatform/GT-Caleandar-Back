@@ -5,7 +5,7 @@ const cors = require('../middleware/corsMiddleware');
 const { formatDate, isToday, isBeforeToday } = require('../utils/dateUtils');
 require('dotenv').config();
 
-// 4. Verificar tareas diarias y enviar recordatorios
+// 1. Verificar tareas diarias y enviar recordatorios
 const verifyDailyTasks = async (req, res) => {
     cors(req, res, async () => {
         console.log('Verificando tareas para hoy...');
@@ -46,7 +46,7 @@ const verifyDailyTasks = async (req, res) => {
     });
 };
 
-// 5. Limpiar tareas vencidas y archivar completadas
+// 2. Limpiar tareas vencidas y archivar completadas
 const cleanupOldTasks = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Fecha actual sin hora
